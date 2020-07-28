@@ -36,6 +36,13 @@ cmdListEnableDebug = [
     'diagnose debug flow trace start 1000'
 ]
 
+ipProtocols = {
+    '1' : 'ICMP',
+    '6' : 'TCP',
+    '17' : 'UDP',
+    '50' : 'ESP'
+}
+
 filterOptions = ['addr','saddr','daddr','port','sport','dport']
 ## 'vd' and 'negate' are not implemented yet.
 # filterOptions_NYI = ['vd','negate']
@@ -60,6 +67,12 @@ def validateIPv4(_ipaddress):
 def validatePort(_port):
     regex = re.match('^([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$',_port)
     return regex
+
+def getIPProtocol(_protonumber):
+    if _protonumber in ipProtocols:
+        return ipProtocols[_protonumber]
+
+    return _protonumber
 
 def convertLogToDict(_data):
     dataList = _data.splitlines()
@@ -142,12 +155,14 @@ def saveAsHTML(_data):
     for key in _data:
         regexSrcDst = re.match(r".+proto=\d+,\s(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):(\d{1,5})..(\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}):(\d{1,5}).+",_data[key][0])
         regexTimestamp = re.match(r"(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}).+",_data[key][0])
+        regexProtocol = re.match(r".+proto=(\d{1,3}),.+",_data[key][0])
         sourceIP = regexSrcDst.group(1)
         sourcePort = regexSrcDst.group(2)
         destIP = regexSrcDst.group(3)
         destPort = regexSrcDst.group(4)
         timestamp = regexTimestamp.group(1)
-        header = timestamp + " Src: " + sourceIP + ":" + sourcePort + " -->> Dst: " + destIP + ":" + destPort 
+        protocol = getIPProtocol(regexProtocol.group(1))
+        header = timestamp + " Src: " + sourceIP + ":" + sourcePort + " -->> Dst: " + destIP + ":" + destPort + " Protocol: " + protocol
         htmlfile.write("<button type=\"button\" class=\"collapsible\">" + str(header) + "</button>\n")
         htmlfile.write("<div class=\"content\">\n")
         #output raw loglines in collapsible row
