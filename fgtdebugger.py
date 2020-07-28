@@ -3,7 +3,6 @@ import sys
 import datetime
 import logging
 import time
-import keyboard
 import re
 import os
 import getpass

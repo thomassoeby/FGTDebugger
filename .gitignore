@@ -131,4 +131,5 @@ dmypy.json
 # Config, logs, reports.
 *.cfg
 *.txt
+!requirements.txt
 *.html
