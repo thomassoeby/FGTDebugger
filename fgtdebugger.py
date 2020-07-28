@@ -40,8 +40,9 @@ filterOptions = ['addr','saddr','daddr','port','sport','dport']
 ## 'vd' and 'negate' are not implemented yet.
 # filterOptions_NYI = ['vd','negate']
 
-logging.basicConfig(filename="test.log", level=logging.DEBUG)
-logger = logging.getLogger("netmiko")
+## remove comments to generate netmiko debug output
+#logging.basicConfig(filename="netmiko.log", level=logging.DEBUG)
+#logger = logging.getLogger("netmiko")
 
 #Validate that input is an actual IPv4 address.
 def validateIPv4(_ipaddress):
@@ -139,7 +140,7 @@ def saveAsHTML(_data):
     htmlfile.write("<h3>Filter Option 2: " + filterValueOption2 + "</h3>\n")
     #Extract data fields from log and parse them to header text.
     for key in _data:
-        regexSrcDst = re.match(r".+proto=\d+,\s(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):(\d{1,5})..(\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}:(\d{1,5})).+",_data[key][0])
+        regexSrcDst = re.match(r".+proto=\d+,\s(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}):(\d{1,5})..(\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}):(\d{1,5}).+",_data[key][0])
         regexTimestamp = re.match(r"(\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}).+",_data[key][0])
         sourceIP = regexSrcDst.group(1)
         sourcePort = regexSrcDst.group(2)
