@@ -21,11 +21,27 @@ configFile = None
 useConfig = False
 dataDict = {}
 
-filterOptions = ['addr','saddr','daddr','port','sport','dport']
-filterOptions_NYI = ['vd','negate']
+cmdListClearDebug = [
+    'diagnose debug reset',
+    'diagnose debug disable',
+    'diagnose debug flow trace stop',
+    'diagnose debug flow filter clear'
+]
 
-#logging.basicConfig(filename="test.log", level=logging.DEBUG)
-#logger = logging.getLogger("netmiko")
+cmdListEnableDebug = [
+    'diagnose debug console timestamp enable',
+    'diagnose debug flow show function-name',
+    'filter-placeholder',
+    'diagnose debug enable',
+    'diagnose debug flow trace start 1000'
+]
+
+filterOptions = ['addr','saddr','daddr','port','sport','dport']
+## 'vd' and 'negate' are not implemented yet.
+# filterOptions_NYI = ['vd','negate']
+
+logging.basicConfig(filename="test.log", level=logging.DEBUG)
+logger = logging.getLogger("netmiko")
 
 #Validate that input is an actual IPv4 address.
 def validateIPv4(_ipaddress):
@@ -183,7 +199,7 @@ def checkConfig():
             print("**** Config validated ****")
             return True
         else:
-            print('**** Error loading host.cfg. Falling back to manual input.****\n  Invalid values found') 
+            print('**** Error loading host.cfg. Falling back to manual input.****\n  ->Invalid values found:') 
             for x in invalidValues:
                 print("->" + x + " = " + configFile['FGTDebugger'][x])
             return False
@@ -333,24 +349,23 @@ device = {
 }
 
 try:
-    net_connect = ConnectHandler(**device)
+    net_connect = ConnectHandler(**device,fast_cli=True)
     print('**** Session Setup completed, configuring the debug settings ****')
 
-    net_connect.send_command('diagnose debug reset')
-    net_connect.send_command('diagnose debug disable')
-    net_connect.send_command('diagnose debug flow trace stop')
-    net_connect.send_command('diagnose debug flow filter clear')
+    for command in cmdListClearDebug:
+        print("->#" + command)
+        net_connect.send_command(command)
 
-    net_connect.send_command('diagnose debug console timestamp enable')
-    net_connect.send_command('diagnose debug flow show function-name')
+    filterIndex = cmdListEnableDebug.index('filter-placeholder')
 
     if filterValueOption2 != '':
-        net_connect.send_command('diagnose debug flow filter {0} {1} {2}'.format(filterValueType,filterValueOption1,filterValueOption2))
+        cmdListEnableDebug[filterIndex] = 'diagnose debug flow filter {0} {1} {2}'.format(filterValueType,filterValueOption1,filterValueOption2)
     else:
-        net_connect.send_command('diagnose debug flow filter {0} {1}'.format(filterValueType,filterValueOption1))
+        cmdListEnableDebug[filterIndex] = 'diagnose debug flow filter {0} {1}'.format(filterValueType,filterValueOption1)
 
-    net_connect.send_command('diagnose debug enable')
-    net_connect.send_command('diagnose debug flow trace start 1000')
+    for command in cmdListEnableDebug:
+        print("->#" + command)
+        net_connect.send_command(command)
 
     result = ""
 
@@ -368,10 +383,8 @@ try:
 
     print('**** Trace stopped ****')
 
-    net_connect.send_command('diagnose debug reset')
-    net_connect.send_command('diagnose debug disable')
-    net_connect.send_command('diagnose debug flow trace stop')
-    net_connect.send_command('diagnose debug flow filter clear')
+    for command in cmdListClearDebug:
+        net_connect.send_command(command)
 
     print('**** Disabled debugging  ****')
 
