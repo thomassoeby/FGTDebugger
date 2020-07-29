@@ -408,7 +408,7 @@ except(EOFError):
 except netmiko.ssh_exception.NetMikoAuthenticationException:
     print("Authentication failed on: " + HostIP)
 except Exception as e:
-    print("Unhandled error occured on: " + HostIP + ": " + e)
+    print("Unhandled error occured on: " + HostIP + ": " + str(e))
 
 now = datetime.datetime.now()
 f = open("output-" + now.strftime("%d-%m-%Y_%H-%M-%S") + ".txt","w+")
